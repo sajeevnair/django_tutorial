@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title>Realtime Notifications</title>
+    <script src="//js.pusher.com/2.2/pusher.min.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css"/>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    {% load staticfiles %}
+
+    <link rel="stylesheet" href="{% static 'notifications/style.css' %}" type="text/css"/>
+</head>
+<body>
+<div data-role="page">
+
+
+    <div data-role="content">
+        <h2>Messages</h2>
+        <ul id="messages" data-role="listview" class="ui-listview"></ul>
+
+        <form action="{% url 'notifications:message' %}" method="post">
+            {% csrf_token %}
+            <label for="textarea" class="ui-hidden-accessible">Message:</label>
+            <textarea name="user_message" id="user_message" placeholder="Message"></textarea>
+
+            <input type="submit" name="Send" value="Submit">
+
+        </form>
+
+    </div><!-- /content -->
+
+</div><!-- /page -->
+<script src="{% static 'notifications/js.cookie.js' %}"></script>
+
+<script>
+    var pusher = new Pusher('{{ PUSHER_KEY }}', {
+        authEndpoint: '{% url 'notifications:auth' %}',
+        auth: {
+            headers: {
+                'X_CSRFTOKEN': '{fdjljdsaflkjljdflk'
+            }
+        }
+    });
+
+    var channel = pusher.subscribe('{{ CHANNEL_NAME }}');
+    channel.bind('{{ CHANNEL_NAME }}', addMessage);
+
+
+    function addMessage(data) {
+        var li = $('<li class="ui-li ui-li-static ui-body-c"></li>');
+        li.text(data.user_message);
+        li.hide();
+        $('#messages').append(li);
+        li.slideDown();
+    }
+
+    $(function () {
+        $('form').submit(function () {
+            var userMessageEl = $('#user_message');
+            var message = $.trim(userMessageEl.val());
+            var $this = $(this);
+            if (message) {
+                $.ajax({
+                    url: $this.attr('action'),
+                    type: $this.attr('method'),
+                    data: $this.serialize()
+                });
+
+                this.reset();
+            }
+
+            return false;
+        });
+    });
+
+</script>
+
+</body>
+</html>

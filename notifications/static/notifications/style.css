@@ -1,0 +1,7 @@
+#messages {
+  min-height: 100px;
+  max-height: 200px;
+  overflow: auto;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #ccc;
+}
